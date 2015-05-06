@@ -3,4 +3,6 @@
     <color name="minutes_bubble_color">#ff0000</color>
     <color name="hours_bubble_color">#00ff00</color>
     <color name="background_color">#ffffff</color>
+    <color name="minutes_bubble_color_ambient">#aaaaaa</color>
+    <color name="background_color_ambient">#000000</color>
 </resources>
