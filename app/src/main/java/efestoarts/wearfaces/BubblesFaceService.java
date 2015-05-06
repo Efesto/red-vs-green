@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,23 +65,29 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         private Paint backgroundPaint;
         private Paint minutesBubblePaintAmbientMode;
         private Paint backgroundPaintAmbientMode;
+        private Paint hoursBubblePaintAmbientMode;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            minutesBubblePaint = new Paint();
             Resources resources = getResources();
 
+            minutesBubblePaint = new Paint();
             minutesBubblePaint.setColor(resources.getColor(R.color.minutes_bubble_color));
             minutesBubblePaint.setAntiAlias(true);
 
             hoursBubblePaint = new Paint();
             hoursBubblePaint.setColor(resources.getColor(R.color.hours_bubble_color));
             hoursBubblePaint.setAntiAlias(true);
+            hoursBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
             minutesBubblePaintAmbientMode = new Paint();
             minutesBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
+
+            hoursBubblePaintAmbientMode = new Paint();
+            hoursBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
+            hoursBubblePaintAmbientMode.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
 
             backgroundPaint = new Paint();
@@ -120,13 +128,14 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             if (!isInAmbientMode())
             {
                 canvas.drawPaint(backgroundPaint);
-                canvas.drawCircle(bounds.centerX(), bounds.centerY(), hoursBubbleRadius, hoursBubblePaint);
                 canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, minutesBubblePaint);
+                canvas.drawCircle(bounds.centerX(), bounds.centerY(), hoursBubbleRadius, hoursBubblePaint);
             }
             else
             {
                 canvas.drawPaint(backgroundPaintAmbientMode);
                 canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, minutesBubblePaintAmbientMode);
+                canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, hoursBubblePaintAmbientMode);
 
             }
 
