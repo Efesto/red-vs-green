@@ -61,9 +61,7 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         private Paint hoursBubblePaintAmbientMode;
         private Paint textPaint;
         private int textSize = 70;
-        private int leftMargin = 20;
-        private int rightMargin = leftMargin + 2;
-
+        private int maxTextWidth = 100;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -94,6 +92,7 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             textPaint = new Paint();
             textPaint.setColor(resources.getColor(R.color.text_color));
             textPaint.setTextSize(textSize);
+            textPaint.setTextAlign(Paint.Align.CENTER);
             textPaint.setAntiAlias(true);
 
             time = new Time();
@@ -123,26 +122,37 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             time.setToNow();
 
             canvas.drawPaint(backgroundPaint);
-            drawHoursBubble(canvas, bounds);
             drawMinutesBubble(canvas, bounds);
+            drawHoursBubble(canvas, bounds);
         }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {
-            float hoursBubbleRadius = (((bounds.width() / 23) * time.hour) + leftMargin + textSize) / 2;
-            float centerX = leftMargin + (textSize / 2);
-            float textStartingPoint = leftMargin;
+            int minBubbleRadius = maxTextWidth / 2;
 
-            canvas.drawCircle(centerX, bounds.centerY(), hoursBubbleRadius, hoursBubblePaint);
-            canvas.drawText(String.format("%02d%n", time.hour), textStartingPoint, bounds.centerY() + (textSize / 2) - 7, textPaint);
+            float maxBubbleRadius = bounds.width() - maxTextWidth - 2 * minBubbleRadius;
+            float bubbleRadius = ((maxBubbleRadius / 23) * time.hour) + minBubbleRadius;
+            float bubbleCenterX = maxTextWidth / 2;
+
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, hoursBubblePaint);
+
+            drawTimeInBubble(canvas, time.hour, bubbleCenterX, bounds.centerY());
         }
 
         private void drawMinutesBubble(Canvas canvas, Rect bounds) {
-            float radius = (((bounds.width() / 59) * time.minute) + rightMargin + textSize) / 2;
-            float centerX = bounds.width() - rightMargin - (textSize / 2);
-            float textStartingPoint = centerX - textSize / 2;
+            int minBubbleRadius = maxTextWidth / 2;
 
-            canvas.drawCircle(centerX, bounds.centerY(), radius, minutesBubblePaint);
-            canvas.drawText(String.format("%02d%n", time.minute), textStartingPoint, bounds.centerY() + (textSize / 2) - 7, textPaint);
+            float maxBubbleRadius = bounds.width() - maxTextWidth - 2 * minBubbleRadius;
+            float bubbleRadius = ((maxBubbleRadius / 59) * time.minute) + minBubbleRadius;
+            float bubbleCenterX = bounds.width() - (maxTextWidth / 2);
+
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, minutesBubblePaint);
+
+            drawTimeInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY());
+        }
+
+        private void drawTimeInBubble(Canvas canvas, int time, float bubbleCenterX, float bubbleCenterY)
+        {
+            canvas.drawText(String.format("%02d%n", time), bubbleCenterX + 10, bubbleCenterY + (textSize / 2) - 10, textPaint);
         }
 
         @Override
