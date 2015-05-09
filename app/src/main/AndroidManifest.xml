@@ -14,18 +14,18 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault" >
         <service
-            android:name=".BubblesFaceService"
-            android:label="@string/bubbles_face_name"
+            android:name=".RedVsGreenFaceService"
+            android:label="@string/face_name"
             android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/preview_digital" />
+                android:resource="@drawable/red_vs_green_preview" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_digital_circular" />
+                android:resource="@drawable/red_vs_green_preview_circular" />
 
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />

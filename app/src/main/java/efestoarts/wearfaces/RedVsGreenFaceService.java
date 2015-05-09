@@ -12,14 +12,14 @@ import android.view.SurfaceHolder;
 
 import java.util.concurrent.TimeUnit;
 
-public class BubblesFaceService extends CanvasWatchFaceService {
+public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
     @Override
     public Engine onCreateEngine() {
-        return new BubblesEngine();
+        return new RedVsGreenEngine();
     }
 
-    class BubblesEngine extends CanvasWatchFaceService.Engine {
+    class RedVsGreenEngine extends CanvasWatchFaceService.Engine {
 
         private final static int MSG_UPDATE_TIME = 0;
         private final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
@@ -60,7 +60,7 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         private Paint digitPaint;
 
         private int digitSize = 70;
-        private int maxDigitWidth = 100;
+        private int maxDigitWidth = 120;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
