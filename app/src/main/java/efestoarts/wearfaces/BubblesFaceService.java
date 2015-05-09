@@ -126,6 +126,7 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             time.setToNow();
 
+            canvas.drawPaint(backgroundPaint);
             drawHoursBubble(canvas, bounds);
             drawMinutesBubble(canvas, bounds);
         }
