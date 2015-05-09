@@ -4,17 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
+import android.graphics.*;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.util.concurrent.TimeUnit;
@@ -42,23 +35,23 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             }
         };
 
-        final Handler mUpdateTimeHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case MSG_UPDATE_TIME:
-                        invalidate();
-                        if (isVisible() && !isInAmbientMode()) {
-                            long timeMs = System.currentTimeMillis();
-                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
-                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
-                            mUpdateTimeHandler
-                                    .sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-                        }
-                        break;
-                }
-            }
-        };
+//        final Handler mUpdateTimeHandler = new Handler() {
+//            @Override
+//            public void handleMessage(Message message) {
+//                switch (message.what) {
+//                    case MSG_UPDATE_TIME:
+//                        invalidate();
+//                        if (isVisible() && !isInAmbientMode()) {
+//                            long timeMs = System.currentTimeMillis();
+//                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
+//                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+//                            mUpdateTimeHandler
+//                                    .sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+//                        }
+//                        break;
+//                }
+//            }
+//        };
 
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
@@ -66,6 +59,11 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         private Paint minutesBubblePaintAmbientMode;
         private Paint backgroundPaintAmbientMode;
         private Paint hoursBubblePaintAmbientMode;
+        private Paint textPaint;
+        private int textSize = 70;
+        private int leftMargin = 20;
+        private int rightMargin = leftMargin + 2;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -80,21 +78,23 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             hoursBubblePaint = new Paint();
             hoursBubblePaint.setColor(resources.getColor(R.color.hours_bubble_color));
             hoursBubblePaint.setAntiAlias(true);
-            hoursBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
             minutesBubblePaintAmbientMode = new Paint();
             minutesBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
 
             hoursBubblePaintAmbientMode = new Paint();
             hoursBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
-            hoursBubblePaintAmbientMode.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-
 
             backgroundPaint = new Paint();
             backgroundPaint.setColor(resources.getColor(R.color.background_color));
 
             backgroundPaintAmbientMode = new Paint();
             backgroundPaintAmbientMode.setColor(resources.getColor(R.color.background_color_ambient));
+
+            textPaint = new Paint();
+            textPaint.setColor(resources.getColor(R.color.text_color));
+            textPaint.setTextSize(textSize);
+            textPaint.setAntiAlias(true);
 
             time = new Time();
         }
@@ -122,23 +122,27 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             time.setToNow();
 
-            float hoursBubbleRadius = ((bounds.width() / 24) * time.hour) / 2;
-            float minutesBubbleRadius = ((bounds.width() / 60) * time.minute) / 2;
+            canvas.drawPaint(backgroundPaint);
+            drawHoursBubble(canvas, bounds);
+            drawMinutesBubble(canvas, bounds);
+        }
 
-            if (!isInAmbientMode())
-            {
-                canvas.drawPaint(backgroundPaint);
-                canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, minutesBubblePaint);
-                canvas.drawCircle(bounds.centerX(), bounds.centerY(), hoursBubbleRadius, hoursBubblePaint);
-            }
-            else
-            {
-                canvas.drawPaint(backgroundPaintAmbientMode);
-                canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, minutesBubblePaintAmbientMode);
-                canvas.drawCircle(bounds.centerX(), bounds.centerY(), minutesBubbleRadius, hoursBubblePaintAmbientMode);
+        private void drawHoursBubble(Canvas canvas, Rect bounds) {
+            float hoursBubbleRadius = (((bounds.width() / 23) * time.hour) + leftMargin + textSize) / 2;
+            float centerX = leftMargin + (textSize / 2);
+            float textStartingPoint = leftMargin;
 
-            }
+            canvas.drawCircle(centerX, bounds.centerY(), hoursBubbleRadius, hoursBubblePaint);
+            canvas.drawText(String.format("%02d%n", time.hour), textStartingPoint, bounds.centerY() + (textSize / 2) - 7, textPaint);
+        }
 
+        private void drawMinutesBubble(Canvas canvas, Rect bounds) {
+            float radius = (((bounds.width() / 59) * time.minute) + rightMargin + textSize) / 2;
+            float centerX = bounds.width() - rightMargin - (textSize / 2);
+            float textStartingPoint = centerX - textSize / 2;
+
+            canvas.drawCircle(centerX, bounds.centerY(), radius, minutesBubblePaint);
+            canvas.drawText(String.format("%02d%n", time.minute), textStartingPoint, bounds.centerY() + (textSize / 2) - 7, textPaint);
         }
 
         @Override

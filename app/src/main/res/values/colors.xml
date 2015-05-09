@@ -5,4 +5,5 @@
     <color name="background_color">#ffffff</color>
     <color name="minutes_bubble_color_ambient">#888888</color>
     <color name="background_color_ambient">#000000</color>
+    <color name="text_color">#ffffff</color>
 </resources>
