@@ -56,12 +56,12 @@ public class BubblesFaceService extends CanvasWatchFaceService {
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
         private Paint backgroundPaint;
-        private Paint minutesBubblePaintAmbientMode;
-        private Paint backgroundPaintAmbientMode;
-        private Paint hoursBubblePaintAmbientMode;
-        private Paint textPaint;
-        private int textSize = 70;
-        private int maxTextWidth = 100;
+        private Paint minutesBubblePaintAmbient;
+        private Paint hoursBubblePaintAmbient;
+        private Paint digitPaint;
+
+        private int digitSize = 70;
+        private int maxDigitWidth = 100;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -70,30 +70,33 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             Resources resources = getResources();
 
             minutesBubblePaint = new Paint();
-            minutesBubblePaint.setColor(resources.getColor(R.color.minutes_bubble_color));
+            minutesBubblePaint.setColor(resources.getColor(R.color.minutes_bubble));
             minutesBubblePaint.setAntiAlias(true);
+            minutesBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
             hoursBubblePaint = new Paint();
-            hoursBubblePaint.setColor(resources.getColor(R.color.hours_bubble_color));
+            hoursBubblePaint.setColor(resources.getColor(R.color.hours_bubble));
             hoursBubblePaint.setAntiAlias(true);
+            hoursBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
-            minutesBubblePaintAmbientMode = new Paint();
-            minutesBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
+            minutesBubblePaintAmbient = new Paint();
+            minutesBubblePaintAmbient.setColor(resources.getColor(R.color.minutes_bubble_ambient));
+            minutesBubblePaintAmbient.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            minutesBubblePaintAmbient.setAntiAlias(true);
 
-            hoursBubblePaintAmbientMode = new Paint();
-            hoursBubblePaintAmbientMode.setColor(resources.getColor(R.color.minutes_bubble_color_ambient));
+            hoursBubblePaintAmbient = new Paint();
+            hoursBubblePaintAmbient.setColor(resources.getColor(R.color.hours_bubble_ambient));
+            hoursBubblePaintAmbient.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            hoursBubblePaintAmbient.setAntiAlias(true);
 
             backgroundPaint = new Paint();
-            backgroundPaint.setColor(resources.getColor(R.color.background_color));
+            backgroundPaint.setColor(resources.getColor(R.color.background));
 
-            backgroundPaintAmbientMode = new Paint();
-            backgroundPaintAmbientMode.setColor(resources.getColor(R.color.background_color_ambient));
-
-            textPaint = new Paint();
-            textPaint.setColor(resources.getColor(R.color.text_color));
-            textPaint.setTextSize(textSize);
-            textPaint.setTextAlign(Paint.Align.CENTER);
-            textPaint.setAntiAlias(true);
+            digitPaint = new Paint();
+            digitPaint.setColor(resources.getColor(R.color.digit));
+            digitPaint.setTextSize(digitSize);
+            digitPaint.setTextAlign(Paint.Align.CENTER);
+            digitPaint.setAntiAlias(true);
 
             time = new Time();
         }
@@ -117,48 +120,59 @@ public class BubblesFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
+
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             time.setToNow();
 
-            canvas.drawPaint(backgroundPaint);
-            drawMinutesBubble(canvas, bounds);
             drawHoursBubble(canvas, bounds);
+            drawMinutesBubble(canvas, bounds);
         }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {
-            int minBubbleRadius = maxTextWidth / 2;
+            int minBubbleRadius = maxDigitWidth / 2;
 
-            float maxBubbleRadius = bounds.width() - maxTextWidth - 2 * minBubbleRadius;
+            float maxBubbleRadius = bounds.width() - maxDigitWidth - 2 * minBubbleRadius;
             float bubbleRadius = ((maxBubbleRadius / 23) * time.hour) + minBubbleRadius;
-            float bubbleCenterX = maxTextWidth / 2;
+            float bubbleCenterX = maxDigitWidth / 2;
 
-            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, hoursBubblePaint);
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, getHoursBubblePaint());
 
-            drawTimeInBubble(canvas, time.hour, bubbleCenterX, bounds.centerY());
+            drawDigitInBubble(canvas, time.hour, bubbleCenterX, bounds.centerY());
         }
 
         private void drawMinutesBubble(Canvas canvas, Rect bounds) {
-            int minBubbleRadius = maxTextWidth / 2;
+            int minBubbleRadius = maxDigitWidth / 2;
 
-            float maxBubbleRadius = bounds.width() - maxTextWidth - 2 * minBubbleRadius;
+            float maxBubbleRadius = bounds.width() - maxDigitWidth - 2 * minBubbleRadius;
             float bubbleRadius = ((maxBubbleRadius / 59) * time.minute) + minBubbleRadius;
-            float bubbleCenterX = bounds.width() - (maxTextWidth / 2);
+            float bubbleCenterX = bounds.width() - (maxDigitWidth / 2);
 
-            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, minutesBubblePaint);
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, getMinutesBubblePaint());
 
-            drawTimeInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY());
+            drawDigitInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY());
         }
 
-        private void drawTimeInBubble(Canvas canvas, int time, float bubbleCenterX, float bubbleCenterY)
+        private void drawDigitInBubble(Canvas canvas, int time, float bubbleCenterX, float bubbleCenterY)
         {
-            canvas.drawText(String.format("%02d%n", time), bubbleCenterX + 10, bubbleCenterY + (textSize / 2) - 10, textPaint);
+            canvas.drawText(String.format("%02d%n", time), bubbleCenterX + 10, bubbleCenterY + (digitSize / 2) - 10, digitPaint);
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
             /* the watch face became visible or invisible */
+        }
+
+        private Paint getHoursBubblePaint()
+        {
+            return isInAmbientMode() ? hoursBubblePaintAmbient : hoursBubblePaint;
+        }
+
+        private Paint getMinutesBubblePaint()
+        {
+            return isInAmbientMode() ? minutesBubblePaintAmbient : minutesBubblePaint;
         }
     }
 }
