@@ -1,4 +1,4 @@
-package efestoarts.wearfaces;
+package efestoarts.wearfaces.wear;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
