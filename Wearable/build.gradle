@@ -9,8 +9,8 @@ android {
         applicationId "efestoarts.wearfaces"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 2
-        versionName "0.1"
+        versionCode Integer.decode(project.VERSION_CODE)
+        versionName project.VERSION_NAME
     }
     buildTypes {
         release {
