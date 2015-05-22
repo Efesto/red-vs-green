@@ -3,6 +3,7 @@ package efestoarts.watchfaces;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.*;
 import android.os.Bundle;
@@ -10,7 +11,7 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.format.Time;
 import android.view.SurfaceHolder;
 
-import java.util.concurrent.TimeUnit;
+import java.util.TimeZone;
 
 public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
@@ -20,9 +21,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
     }
 
     class RedVsGreenEngine extends CanvasWatchFaceService.Engine {
-
-        private final static int MSG_UPDATE_TIME = 0;
-        private final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
         Time time;
         /* receiver to update the time zone */
@@ -34,24 +32,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             }
         };
 
-//        final Handler mUpdateTimeHandler = new Handler() {
-//            @Override
-//            public void handleMessage(Message message) {
-//                switch (message.what) {
-//                    case MSG_UPDATE_TIME:
-//                        invalidate();
-//                        if (isVisible() && !isInAmbientMode()) {
-//                            long timeMs = System.currentTimeMillis();
-//                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
-//                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
-//                            mUpdateTimeHandler
-//                                    .sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-//                        }
-//                        break;
-//                }
-//            }
-//        };
-
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
         private Paint backgroundPaint;
@@ -61,6 +41,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         private int digitSize = 70;
         private int maxDigitWidth = 120;
+        private boolean timeZoneUpdateReceiverIsRegistered = false;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -160,7 +141,17 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            /* the watch face became visible or invisible */
+
+            if (visible && !timeZoneUpdateReceiverIsRegistered) {
+                IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+                registerReceiver(timeZoneUpdateReceiver, filter);
+
+                // Update time zone in case it changed while we weren't visible.
+                time.clear(TimeZone.getDefault().getID());
+                time.setToNow();
+            } else if (timeZoneUpdateReceiverIsRegistered) {
+                unregisterReceiver(timeZoneUpdateReceiver);
+            }
         }
 
         private Paint getHoursBubblePaint() {
