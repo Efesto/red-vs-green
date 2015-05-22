@@ -37,14 +37,13 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
         private Paint backgroundPaint;
-        private Paint minutesBubblePaintAmbient;
-        private Paint hoursBubblePaintAmbient;
         private Paint batteryBubblePaint;
         private Paint digitPaint;
 
         private int digitSize = 70;
         private int maxDigitWidth = 120;
         private boolean timeZoneUpdateReceiverIsRegistered = false;
+        private Paint batteryDigitPaint;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -62,19 +61,8 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             hoursBubblePaint.setAntiAlias(true);
             hoursBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
 
-            minutesBubblePaintAmbient = new Paint();
-            minutesBubblePaintAmbient.setColor(resources.getColor(R.color.minutes_bubble_ambient));
-            minutesBubblePaintAmbient.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-            minutesBubblePaintAmbient.setAntiAlias(true);
-
-            hoursBubblePaintAmbient = new Paint();
-            hoursBubblePaintAmbient.setColor(resources.getColor(R.color.hours_bubble_ambient));
-            hoursBubblePaintAmbient.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-            hoursBubblePaintAmbient.setAntiAlias(true);
-
             backgroundPaint = new Paint();
             backgroundPaint.setColor(resources.getColor(R.color.background));
-
 
             batteryBubblePaint = new Paint();
             batteryBubblePaint.setColor(getResources().getColor(R.color.battery_bubble));
@@ -86,6 +74,10 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             digitPaint.setTextSize(digitSize);
             digitPaint.setTextAlign(Paint.Align.CENTER);
             digitPaint.setAntiAlias(true);
+
+            batteryDigitPaint = new Paint(digitPaint);
+            batteryDigitPaint.setTextSize(30);
+
 
             time = new Time();
         }
@@ -106,6 +98,22 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
+
+            int hoursColor = R.color.hours_bubble;
+            int minutesColor = R.color.minutes_bubble;
+            int batteryColor = R.color.battery_bubble;
+
+            if (inAmbientMode)
+            {
+                hoursColor = R.color.hours_bubble_ambient;
+                minutesColor = R.color.minutes_bubble_ambient;
+                batteryColor = R.color.battery_bubble_ambient;
+            }
+
+            hoursBubblePaint.setColor(getResources().getColor(hoursColor));
+            minutesBubblePaint.setColor(getResources().getColor(minutesColor));
+            batteryBubblePaint.setColor(getResources().getColor(batteryColor));
+
             invalidate();
         }
 
@@ -123,6 +131,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         private void drawChargeBubble(Canvas canvas, Rect bounds)
         {
             //TODO: controllo su corrente attaccata (batteryCapacity = 100)
+            //TODO: Maybe, aggiornamento su cambio stato batteria
             BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
             int batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
             int bubbleRadius = bounds.width() / 8;
@@ -130,10 +139,12 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
             batteryBubblePaint.setAlpha(alphaValue);
 
-            canvas.drawCircle(bounds.centerX(), bubbleRadius, bubbleRadius, batteryBubblePaint);
+            int centerY = bounds.height() - bubbleRadius;
+            int centerX = bounds.centerX();
 
-            canvas.drawText("B", bounds.centerX() + 10, bubbleRadius + (digitPaint.getTextSize() / 2) - 10, digitPaint);
+            canvas.drawCircle(centerX, centerY, bubbleRadius, batteryBubblePaint);
 
+            canvas.drawText(String.format("%02d%n", batteryCapacity), centerX + 5, centerY + (batteryDigitPaint.getTextSize() / 2) - 5, batteryDigitPaint);
         }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {
@@ -143,7 +154,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             float bubbleRadius = ((maxBubbleRadius / 23) * time.hour) + minBubbleRadius;
             float bubbleCenterX = maxDigitWidth / 2;
 
-            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, getHoursBubblePaint());
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, hoursBubblePaint);
 
             drawDigitInBubble(canvas, time.hour, bubbleCenterX, bounds.centerY(), digitPaint);
         }
@@ -155,7 +166,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             float bubbleRadius = ((maxBubbleRadius / 59) * time.minute) + minBubbleRadius;
             float bubbleCenterX = bounds.width() - (maxDigitWidth / 2);
 
-            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, getMinutesBubblePaint());
+            canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, minutesBubblePaint);
 
             drawDigitInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY(), digitPaint);
         }
@@ -178,14 +189,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             } else if (timeZoneUpdateReceiverIsRegistered) {
                 unregisterReceiver(timeZoneUpdateReceiver);
             }
-        }
-
-        private Paint getHoursBubblePaint() {
-            return isInAmbientMode() ? hoursBubblePaintAmbient : hoursBubblePaint;
-        }
-
-        private Paint getMinutesBubblePaint() {
-            return isInAmbientMode() ? minutesBubblePaintAmbient : minutesBubblePaint;
         }
     }
 }
