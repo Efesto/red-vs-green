@@ -1,4 +1,4 @@
-package efestoarts.wearfaces.wear;
+package efestoarts.watchfaces;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -151,22 +151,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, getMinutesBubblePaint());
 
             drawDigitInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY(), digitPaint);
-        }
-
-        private void drawSecondsBubble(Canvas canvas, Rect bounds) {
-            Paint secondsBubblePaint = new Paint();
-            secondsBubblePaint.setColor(getResources().getColor(R.color.seconds_bubble));
-            secondsBubblePaint.setAntiAlias(true);
-            secondsBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-
-            Paint secondsDigitPaint = new Paint(digitPaint);
-            secondsDigitPaint.setTextSize(digitSize / 2);
-
-            int maxSecondsDigitWidth = 60;
-            int bubbleRadius = maxSecondsDigitWidth / 2;
-
-            canvas.drawCircle(bounds.centerX(), bounds.centerY(), bubbleRadius, secondsBubblePaint);
-            drawDigitInBubble(canvas, time.second, bounds.centerX(), bounds.centerY(), secondsDigitPaint);
         }
 
         private void drawDigitInBubble(Canvas canvas, int time, float bubbleCenterX, float bubbleCenterY, Paint paint) {
