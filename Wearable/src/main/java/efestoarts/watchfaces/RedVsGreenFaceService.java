@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.*;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.format.Time;
@@ -14,6 +15,7 @@ import android.view.SurfaceHolder;
 import java.util.TimeZone;
 
 public class RedVsGreenFaceService extends CanvasWatchFaceService {
+
 
     @Override
     public Engine onCreateEngine() {
@@ -37,6 +39,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         private Paint backgroundPaint;
         private Paint minutesBubblePaintAmbient;
         private Paint hoursBubblePaintAmbient;
+        private Paint batteryBubblePaint;
         private Paint digitPaint;
 
         private int digitSize = 70;
@@ -71,6 +74,12 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
             backgroundPaint = new Paint();
             backgroundPaint.setColor(resources.getColor(R.color.background));
+
+
+            batteryBubblePaint = new Paint();
+            batteryBubblePaint.setColor(getResources().getColor(R.color.battery_bubble));
+            batteryBubblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            batteryBubblePaint.setAntiAlias(true);
 
             digitPaint = new Paint();
             digitPaint.setColor(resources.getColor(R.color.digit));
@@ -108,6 +117,23 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             canvas.drawPaint(backgroundPaint);
             drawHoursBubble(canvas, bounds);
             drawMinutesBubble(canvas, bounds);
+            drawChargeBubble(canvas, bounds);
+        }
+
+        private void drawChargeBubble(Canvas canvas, Rect bounds)
+        {
+            //TODO: controllo su corrente attaccata (batteryCapacity = 100)
+            BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
+            int batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+            int bubbleRadius = bounds.width() / 8;
+            int alphaValue = ((batteryCapacity / 100) * 255);
+
+            batteryBubblePaint.setAlpha(alphaValue);
+
+            canvas.drawCircle(bounds.centerX(), bubbleRadius, bubbleRadius, batteryBubblePaint);
+
+            canvas.drawText("B", bounds.centerX() + 10, bubbleRadius + (digitPaint.getTextSize() / 2) - 10, digitPaint);
+
         }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {

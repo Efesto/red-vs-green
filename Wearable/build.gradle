@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "efestoarts.wearfaces"
-        minSdkVersion 16
+        minSdkVersion Integer.decode(project.MIN_SDK)
         targetSdkVersion 22
         versionCode Integer.decode(project.VERSION_CODE)
         versionName project.VERSION_NAME
