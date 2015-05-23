@@ -10,6 +10,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.util.TimeZone;
@@ -117,7 +118,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
-
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             time.setToNow();
@@ -130,12 +130,14 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         private void drawChargeBubble(Canvas canvas, Rect bounds)
         {
-            //TODO: controllo su corrente attaccata (batteryCapacity = 100)
-            //TODO: Maybe, aggiornamento su cambio stato batteria
+            //TODO: ci vuole qualcosa per far capire che è la batteria
             BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
             int batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
             int bubbleRadius = bounds.width() / 8;
-            int alphaValue = ((batteryCapacity / 100) * 255);
+            int alphaMin = 50;
+            int alphaValue = Math.round(((batteryCapacity / 100f)) * (255 - alphaMin)) + alphaMin;
+
+            Log.d("DEBUG!!", "AlphaValue: " + alphaValue);
 
             batteryBubblePaint.setAlpha(alphaValue);
 
