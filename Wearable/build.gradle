@@ -6,7 +6,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "efestoarts.wearfaces"
+        applicationId "efestoarts.redvsgreen"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode Integer.decode(project.VERSION_CODE)
@@ -22,5 +22,5 @@ android {
 
 dependencies {
     compile 'com.google.android.support:wearable:1.1.0'
-    compile 'com.google.android.gms:play-services-wearable:7.3.0'
+    compile 'com.google.android.gms:play-services-wearable:7.5.0'
 }

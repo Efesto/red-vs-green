@@ -1,4 +1,4 @@
-package efestoarts.watchfaces;
+package efestoarts.redvsgreen;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
