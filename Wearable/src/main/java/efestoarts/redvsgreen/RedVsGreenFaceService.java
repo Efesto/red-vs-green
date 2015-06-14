@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.*;
+import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -131,20 +132,23 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         {
             BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
             int batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-            int bubbleRadius = bounds.width() / 8;
-            int alphaMin = 50;
-            int alphaValue = Math.round(((batteryCapacity / 100f)) * (255 - alphaMin)) + alphaMin;
-
-            batteryBubblePaint.setAlpha(alphaValue);
-
+            int bubbleRadius = bounds.width() / 10;
             int centerY = bounds.height() - bubbleRadius;
             int centerX = bounds.centerX();
 
-            canvas.drawCircle(centerX, centerY, bubbleRadius, batteryBubblePaint);
+            float bubbleAngle = 3.6f * batteryCapacity;
 
-            String batteryStatus = String.format("%02d", batteryCapacity);
-            canvas.drawText(batteryStatus, centerX + 5, centerY + (batteryDigitPaint.getTextSize() / 2) - 5, batteryDigitPaint);
-        }
+            RectF oval = new RectF(centerX - bubbleRadius, centerY - bubbleRadius, centerX + bubbleRadius, centerY + bubbleRadius);
+            canvas.drawArc(oval, 270, bubbleAngle, true, batteryBubblePaint);
+            Drawable batteryDrawable = getDrawable(R.drawable.ic_battery_std_white_18dp);
+            batteryDrawable.setBounds(centerX - batteryDrawable.getMinimumWidth()  / 2,
+                    centerY - batteryDrawable.getMinimumHeight() / 2,
+                    centerX + batteryDrawable.getMinimumWidth() / 2,
+                    centerY + batteryDrawable.getMinimumHeight() / 2);
+
+            batteryDrawable.draw(canvas);
+
+          }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {
             int minBubbleRadius = maxDigitWidth / 2;
