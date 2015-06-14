@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         minSdkVersion Integer.decode(project.MIN_SDK)
-        applicationId "efestoarts.redvsgreen"
+        applicationId project.APPLICATION_ID
         targetSdkVersion 22
         versionCode Integer.decode(project.VERSION_CODE)
         versionName project.VERSION_NAME
