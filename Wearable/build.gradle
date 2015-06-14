@@ -6,10 +6,8 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "efestoarts.wearfaces"
         minSdkVersion Integer.decode(project.MIN_SDK)
         applicationId "efestoarts.redvsgreen"
-        minSdkVersion 16
         targetSdkVersion 22
         versionCode Integer.decode(project.VERSION_CODE)
         versionName project.VERSION_NAME
