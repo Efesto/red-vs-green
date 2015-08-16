@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId project.APPLICATION_ID
         minSdkVersion Integer.decode(project.MIN_SDK)
-        targetSdkVersion 22
+        targetSdkVersion Integer.decode(project.TARGET_SDK)
         versionCode Integer.decode(project.VERSION_CODE)
         versionName project.VERSION_NAME
     }
@@ -38,6 +38,6 @@ android {
 
 dependencies {
     compile 'com.google.android.support:wearable:1.1.0'
-    compile 'com.google.android.gms:play-services-wearable:7.5.0'
+    compile 'com.google.android.gms:play-services-wearable:7.8.0'
     wearApp project(':Wearable')
 }
