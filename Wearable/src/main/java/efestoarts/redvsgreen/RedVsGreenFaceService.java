@@ -176,28 +176,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         }
 
         private TimeZoneUpdateReceiver timeZoneUpdateReceiver;
-//        private RefreshDisplayReceiver refreshDisplayReceiver;
-
-        class RefreshDisplayReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                invalidate();
-            }
-
-//            public void register() {
-//                if (!isRegistered) {
-//                    IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-//                    registerReceiver(this, filter);
-//                    isRegistered = true;
-//                }
-//            }
-//
-//            public void unregister() {
-//                if (isRegistered) {
-//                    unregisterReceiver(this);
-//                }
-//            }
-        }
 
         class TimeZoneUpdateReceiver extends BroadcastReceiver {
             public boolean isRegistered = false;
