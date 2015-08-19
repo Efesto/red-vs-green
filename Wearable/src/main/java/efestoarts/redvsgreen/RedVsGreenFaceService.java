@@ -10,10 +10,12 @@ import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.Time;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class RedVsGreenFaceService extends CanvasWatchFaceService {
@@ -26,7 +28,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
     class RedVsGreenEngine extends CanvasWatchFaceService.Engine {
 
-        Time time;
+        GregorianCalendar time;
 
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
@@ -76,10 +78,10 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             //This because, for undetectable reasons, the statusBar gravity goes to the deep right of the screen on LG Watch R
             setWatchFaceStyle(
                     new WatchFaceStyle.Builder(RedVsGreenFaceService.this)
-                            .setStatusBarGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP)
+                            .setStatusBarGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP)
                             .build());
 
-            time = new Time();
+            time = new GregorianCalendar();
         }
 
         @Override
@@ -111,7 +113,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            time.setToNow();
+            setTimeToNow();
 
             canvas.drawPaint(backgroundPaint);
             drawHoursBubble(canvas, bounds);
@@ -144,24 +146,24 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             int minBubbleRadius = maxDigitWidth / 2;
 
             float maxBubbleRadius = bounds.width() - maxDigitWidth - 2 * minBubbleRadius;
-            float bubbleRadius = ((maxBubbleRadius / 23) * time.hour) + minBubbleRadius;
+            float bubbleRadius = ((maxBubbleRadius / 23) * time.get(Calendar.HOUR_OF_DAY)) + minBubbleRadius;
             float bubbleCenterX = maxDigitWidth / 2;
 
             canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, hoursBubblePaint);
 
-            drawDigitInBubble(canvas, time.hour, bubbleCenterX, bounds.centerY(), digitPaint);
+            drawDigitInBubble(canvas, time.get(Calendar.HOUR_OF_DAY), bubbleCenterX, bounds.centerY(), digitPaint);
         }
 
         private void drawMinutesBubble(Canvas canvas, Rect bounds) {
             int minBubbleRadius = maxDigitWidth / 2;
 
             float maxBubbleRadius = bounds.width() - maxDigitWidth - 2 * minBubbleRadius;
-            float bubbleRadius = ((maxBubbleRadius / 59) * time.minute) + minBubbleRadius;
+            float bubbleRadius = ((maxBubbleRadius / 59) * time.get(Calendar.MINUTE)) + minBubbleRadius;
             float bubbleCenterX = bounds.width() - (maxDigitWidth / 2);
 
             canvas.drawCircle(bubbleCenterX, bounds.centerY(), bubbleRadius, minutesBubblePaint);
 
-            drawDigitInBubble(canvas, time.minute, bubbleCenterX, bounds.centerY(), digitPaint);
+            drawDigitInBubble(canvas, time.get(Calendar.MINUTE), bubbleCenterX, bounds.centerY(), digitPaint);
         }
 
         private void drawDigitInBubble(Canvas canvas, int time, float bubbleCenterX, float bubbleCenterY, Paint paint) {
@@ -176,8 +178,8 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
                 timeZoneUpdateReceiver.register();
 
                 // Update time zone in case it changed while we weren't visible.
-                time.clear(TimeZone.getDefault().getID());
-                time.setToNow();
+                time.setTimeZone(TimeZone.getDefault());
+                setTimeToNow();
             } else {
                 timeZoneUpdateReceiver.unregister();
             }
@@ -190,8 +192,8 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                time.clear(intent.getStringExtra("time-zone"));
-                time.setToNow();
+                time.setTimeZone(TimeZone.getTimeZone(intent.getStringExtra("time-zone")));
+                setTimeToNow();
             }
 
             public void register() {
@@ -209,6 +211,10 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
                 }
             }
 
+        }
+
+        private void setTimeToNow() {
+            time.setTime(new Date());
         }
     }
 }
