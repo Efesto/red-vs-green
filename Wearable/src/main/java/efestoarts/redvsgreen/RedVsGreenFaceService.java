@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
-import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.format.Time;
 import android.view.SurfaceHolder;
@@ -26,14 +25,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
     class RedVsGreenEngine extends CanvasWatchFaceService.Engine {
 
         Time time;
-        /* receiver to update the time zone */
-        final BroadcastReceiver timeZoneUpdateReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                time.clear(intent.getStringExtra("time-zone"));
-                time.setToNow();
-            }
-        };
 
         private Paint minutesBubblePaint;
         private Paint hoursBubblePaint;
@@ -43,7 +34,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         private int digitSize = 70;
         private int maxDigitWidth = 120;
-        private boolean timeZoneUpdateReceiverIsRegistered = false;
         private Paint batteryDigitPaint;
 
         @Override
@@ -79,19 +69,13 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             batteryDigitPaint = new Paint(digitPaint);
             batteryDigitPaint.setTextSize(30);
 
+            timeZoneUpdateReceiver = new TimeZoneUpdateReceiver();
 
             time = new Time();
         }
 
         @Override
-        public void onPropertiesChanged(Bundle properties) {
-            super.onPropertiesChanged(properties);
-            /* get device features (burn-in, low-bit ambient) */
-        }
-
-        @Override
         public void onTimeTick() {
-            //Questo di default scatta una volta al minuto
             super.onTimeTick();
             invalidate();
         }
@@ -104,8 +88,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             int minutesColor = R.color.minutes_bubble;
             int batteryColor = R.color.battery_bubble;
 
-            if (inAmbientMode)
-            {
+            if (inAmbientMode) {
                 hoursColor = R.color.hours_bubble_ambient;
                 minutesColor = R.color.minutes_bubble_ambient;
                 batteryColor = R.color.battery_bubble_ambient;
@@ -128,8 +111,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             drawBatteryChargeBubble(canvas, bounds);
         }
 
-        private void drawBatteryChargeBubble(Canvas canvas, Rect bounds)
-        {
+        private void drawBatteryChargeBubble(Canvas canvas, Rect bounds) {
             BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
             int batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
             int bubbleRadius = bounds.width() / 10;
@@ -141,14 +123,14 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             RectF oval = new RectF(centerX - bubbleRadius, centerY - bubbleRadius, centerX + bubbleRadius, centerY + bubbleRadius);
             canvas.drawArc(oval, 270, bubbleAngle, true, batteryBubblePaint);
             Drawable batteryDrawable = getDrawable(R.drawable.ic_battery_std_white_18dp);
-            batteryDrawable.setBounds(centerX - batteryDrawable.getMinimumWidth()  / 2,
+            batteryDrawable.setBounds(centerX - batteryDrawable.getMinimumWidth() / 2,
                     centerY - batteryDrawable.getMinimumHeight() / 2,
                     centerX + batteryDrawable.getMinimumWidth() / 2,
                     centerY + batteryDrawable.getMinimumHeight() / 2);
 
             batteryDrawable.draw(canvas);
 
-          }
+        }
 
         private void drawHoursBubble(Canvas canvas, Rect bounds) {
             int minBubbleRadius = maxDigitWidth / 2;
@@ -182,16 +164,65 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
-            if (visible && !timeZoneUpdateReceiverIsRegistered) {
-                IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-                registerReceiver(timeZoneUpdateReceiver, filter);
+            if (visible) {
+                timeZoneUpdateReceiver.register();
 
                 // Update time zone in case it changed while we weren't visible.
                 time.clear(TimeZone.getDefault().getID());
                 time.setToNow();
-            } else if (timeZoneUpdateReceiverIsRegistered) {
-                unregisterReceiver(timeZoneUpdateReceiver);
+            } else {
+                timeZoneUpdateReceiver.unregister();
             }
+        }
+
+        private TimeZoneUpdateReceiver timeZoneUpdateReceiver;
+//        private RefreshDisplayReceiver refreshDisplayReceiver;
+
+        class RefreshDisplayReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                invalidate();
+            }
+
+//            public void register() {
+//                if (!isRegistered) {
+//                    IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+//                    registerReceiver(this, filter);
+//                    isRegistered = true;
+//                }
+//            }
+//
+//            public void unregister() {
+//                if (isRegistered) {
+//                    unregisterReceiver(this);
+//                }
+//            }
+        }
+
+        class TimeZoneUpdateReceiver extends BroadcastReceiver {
+            public boolean isRegistered = false;
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                time.clear(intent.getStringExtra("time-zone"));
+                time.setToNow();
+            }
+
+            public void register() {
+                if (!isRegistered) {
+                    IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+                    registerReceiver(this, filter);
+                    isRegistered = true;
+                }
+            }
+
+            public void unregister() {
+                if (isRegistered) {
+                    unregisterReceiver(this);
+                    isRegistered = false;
+                }
+            }
+
         }
     }
 }
