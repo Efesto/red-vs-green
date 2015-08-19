@@ -9,7 +9,9 @@ import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
+import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import java.util.TimeZone;
@@ -70,6 +72,12 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
             batteryDigitPaint.setTextSize(30);
 
             timeZoneUpdateReceiver = new TimeZoneUpdateReceiver();
+
+            //This because, for undetectable reasons, the statusBar gravity goes to the deep right of the screen on LG Watch R
+            setWatchFaceStyle(
+                    new WatchFaceStyle.Builder(RedVsGreenFaceService.this)
+                            .setStatusBarGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP)
+                            .build());
 
             time = new Time();
         }
