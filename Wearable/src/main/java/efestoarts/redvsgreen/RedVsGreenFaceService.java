@@ -87,7 +87,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-            invalidate();
+            setTimeToNow();
         }
 
         @Override
@@ -113,8 +113,6 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            setTimeToNow();
-
             canvas.drawPaint(backgroundPaint);
             drawHoursBubble(canvas, bounds);
             drawMinutesBubble(canvas, bounds);
@@ -215,6 +213,7 @@ public class RedVsGreenFaceService extends CanvasWatchFaceService {
 
         private void setTimeToNow() {
             time.setTime(new Date());
+            invalidate();
         }
     }
 }
